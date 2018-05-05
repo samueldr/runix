@@ -195,6 +195,7 @@ RSpec.describe NEL do
 				"{null = null;}",
 				"{a = b;null = null;}",
 				"{ a = b ; null = null ; }",
+				"{ a = ''b'' ; }",
 				"{inherit;}",
 				"{inherit pkgs;}",
 				"{inherit pkgs a b;}",
@@ -203,6 +204,8 @@ RSpec.describe NEL do
 				"{inherit (self) pkgs; a = b;}",
 				"{inherit(a)a;}",
 				"{inherit (a) a;}",
+				%q[{"a" = ''a'';}],
+				%q[{"a" = null;}],
 			].each do |str|
 				it "(#{str.inspect})" do
 					expect(parser.set).to parse(str)
@@ -216,6 +219,7 @@ RSpec.describe NEL do
 				"{null}",
 				"{null=null}",
 				"{null = null}",
+				%q[{''a'' = "a";}],
 			].each do |str|
 				it "(#{str.inspect})" do
 					expect(parser.set).to_not parse(str)

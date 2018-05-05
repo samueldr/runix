@@ -122,9 +122,12 @@ class NEL < Parslet::Parser
 		(space?.as(:lhs_) >> str("(") >> identifier >> str(")") >> space?.as(:rhs?)).maybe.as(:set)>>
 		(space? >> identifier ).repeat(0).as(:attributes)
 	}
+	rule(:set_attr_name) {
+		# TODO : Add antiquotation (${})
+		identifier | quoted_string
+	}
 	rule(:set_pair) {
-		# TODO : verify use of `identifier` on lhs.
-		identifier.as(:lhs) >> space?.as(:lhs_) >> str("=") >> space?.as(:rhs_) >> value.as(:rhs)
+		set_attr_name.as(:lhs) >> space?.as(:lhs_) >> str("=") >> space?.as(:rhs_) >> value.as(:rhs)
 	}
 
 	#
