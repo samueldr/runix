@@ -99,36 +99,41 @@ class NEL < Parslet::Parser
 	# Lists
 	#
 	rule(:list) {
-		(
-			str("[") >> (
-				value.as(:value) | space.as(:space)
-			).repeat >> str("]")
-		).as(:list)
+		spaced(
+			str("["),
+			(expression).repeat,
+			str("]"),
+		)
 	}
 
 	#
 	# Sets
 	#
 	rule(:set) {
-		(str("rec") >> space?).maybe.as(:rec) >>
-		str("{") >> space? >>
-		(
-			(set_inherit | set_pair) >> space?.as(:before_) >> str(";") >> space?.as(:after_)
-		).repeat.as(:values) >>
-		str("}")
+		spaced(
+			keyword("rec").maybe.as(:rec),
+			str("{"),
+			(
+				(set_inherit | set_pair) >> space?.as(:before_) >> str(";") >> space?.as(:after_)
+			).repeat.as(:values),
+			str("}"),
+		)
 	}
 	rule(:set_inherit) {
 		# Parenthesis makes this hard!
-		str("inherit") >>
+		keyword("inherit") >>
 		(space?.as(:lhs_) >> str("(") >> identifier >> str(")") >> space?.as(:rhs?)).maybe.as(:set)>>
 		(space? >> identifier ).repeat(0).as(:attributes)
 	}
 	rule(:set_attr_name) {
-		# TODO : Add antiquotation (${})
 		identifier | quoted_string | antiquotation
 	}
 	rule(:set_pair) {
-		set_attr_name.as(:lhs) >> space?.as(:lhs_) >> str("=") >> space?.as(:rhs_) >> value.as(:rhs)
+		spaced(
+			set_attr_name.as(:lhs),
+			str("="),
+			expression.as(:rhs),
+		)
 	}
 
 	#
@@ -142,18 +147,26 @@ class NEL < Parslet::Parser
 	# Let
 	#
 	rule(:let) {
-		str("let") >> space?.as(:before_) >>
-		(
-			let_pair >> space?.as(:before_) >> str(";") >> space?.as(:after_)
-		).repeat.as(:values) >>
-		space?.as(:after_) >> str("in") >> (identifier_match | number).absent?
+		spaced(
+			keyword("let"),
+			let_binds,
+			keyword("in"),
+		)
 	}
 	rule(:let_attr_name) {
-		# TODO : Add antiquotation (${})
-		identifier | quoted_string
+		identifier | quoted_string | antiquotation
 	}
-	rule(:let_pair) {
-		let_attr_name.as(:lhs) >> space?.as(:lhs_) >> str("=") >> space?.as(:rhs_) >> value.as(:rhs)
+	rule(:let_bind_pair) {
+		spaced(
+			let_attr_name.as(:lhs),
+			str("="),
+			expression.as(:rhs),
+		)
+	}
+	rule(:let_binds) {
+		(
+			let_bind_pair >> space?.as(:before_) >> str(";") >> space?.as(:after_)
+		).repeat.as(:binds)
 	}
 
 	#
@@ -192,11 +205,11 @@ class NEL < Parslet::Parser
 	#
 	rule(:conditional) {
 		spaced(
-			str("if"),
-			expression.as(:if),
-			str("then"),
+			keyword("if"),
+			expression.as(:cond),
+			keyword("then"),
 			expression.as(:then),
-			str("else"),
+			keyword("else"),
 			expression.as(:else),
 		)
 	}
@@ -206,10 +219,10 @@ class NEL < Parslet::Parser
 	#
 	rule(:assert) {
 		spaced(
-			str("assert"),
-			expression.as(:assertion),
+			keyword("assert"),
+			expression.as(:cond),
 			str(";"),
-			expression.as(:value),
+			expression.as(:body),
 		)
 	}
 
@@ -218,10 +231,10 @@ class NEL < Parslet::Parser
 	#
 	rule(:with) {
 		spaced(
-			str("with"),
-			expression.as(:set),
-			str(";"),
-			expression.as(:expr),
+			keyword("with"),
+			expression.as(:attrs),
+			keyword(";"),
+			expression.as(:body),
 		)
 	}
 
@@ -229,27 +242,36 @@ class NEL < Parslet::Parser
 	# Identifiers
 	#
 
+	def keyword(word)
+		str(word) >> (identifier_match | number).absent?
+	end
+
 	# Marks a word as forbidden for identifiers.
 	def not_keyword(string)
 		(str(string) >> identifier_match.absent?).absent?
 	end
+	rule(:not_keywords) {
+		[
+			"if",
+			"then",
+			"else",
+			"assert",
+			"with",
+			"let",
+			"in",
+			"rec",
+			"inherit",
+			"or",
+		].map{ |w| not_keyword(w) }.reduce(&:>>)
+	}
 
 	rule(:identifier_match) {
+		# ID          [a-zA-Z\_][a-zA-Z0-9\_\'\-]*
 		match['a-zA-Z_'] >> match['a-zA-Z0-9_\'-'].repeat
 	}
+
 	rule(:identifier) {
-		# ID          [a-zA-Z\_][a-zA-Z0-9\_\'\-]*
-		not_keyword("if") >>
-		not_keyword("then") >>
-		not_keyword("else") >>
-		not_keyword("assert") >>
-		not_keyword("with") >>
-		not_keyword("let") >>
-		not_keyword("in") >>
-		not_keyword("rec") >>
-		not_keyword("inherit") >>
-		not_keyword("or") >>
-		(identifier_match).as(:identifier)
+		not_keywords >> (identifier_match).as(:identifier)
 	}
 
 	rule(:attr_path) {
@@ -338,7 +360,7 @@ class NEL < Parslet::Parser
 	# Compound rules
 	#
 	rule(:value) {
-		(null | boolean | function | list | set | simple_value | identifier).as(:value)
+		null | boolean | function | list | set | simple_value | identifier
 	}
 	rule(:simple_value) { number | string | path }
 	
