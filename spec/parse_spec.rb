@@ -277,6 +277,7 @@ RSpec.describe NEL do
 		context "let" do
 			[
 				"a: 1",
+				"args: 1",
 				"{a}: 1",
 				"{a, b}: 1",
 				"{ a , b }: 1",
@@ -284,6 +285,9 @@ RSpec.describe NEL do
 				"{a,b,...}: 1",
 				'{ a , b ? "ok" }: 1',
 				'{ a , b ? 1+1 }: 1',
+				"args@{a}: 1",
+				"{a} @ args: 1",
+				"{a}@args: 1",
 			].each do |str|
 				it "(#{str.inspect})" do
 					expect(parser.function).to parse(str)
@@ -294,6 +298,10 @@ RSpec.describe NEL do
 
 			[
 				"a:b", # URI
+				"args @: 1",
+				"args@: 1",
+				"args @ : 1",
+				"args @ {a}: 1", # uh, when prefixed there are no spaces.
 				"{ a , b, ..., c }: 1",
 			].each do |str|
 				it "(#{str.inspect})" do

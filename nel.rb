@@ -166,6 +166,10 @@ class NEL < Parslet::Parser
 		(str("?") >> space? >> expression).maybe >>
 		space?.as(:after_)
 	}
+	rule(:function_set_pattern_with_args) {
+		(function_set_pattern >> (space?.as(:before_) >> str("@") >> space?.as(:after_) >> identifier).maybe) |
+		((identifier >> str("@")).maybe >> function_set_pattern)
+	}
 	rule(:function_set_pattern) {
 		str("{") >> space? >>
 		(
@@ -177,8 +181,8 @@ class NEL < Parslet::Parser
 	}
 	rule(:function_pattern) {
 		# TODO : add arg@ @args
-		identifier.as(:identifier) |
-		function_set_pattern.as(:set)
+		function_set_pattern_with_args.as(:set) |
+		(identifier.as(:identifier) >> (space? >> str("@")).absent?)
 	}
 	rule(:function) {
 		function_pattern.as(:pattern) >> str(":") >> space >> expression.as(:body)
