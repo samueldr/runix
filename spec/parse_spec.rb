@@ -238,6 +238,42 @@ RSpec.describe NEL do
 			end
 		end
 
+		context "let" do
+			[
+				"let in",
+				"let ina = 1; in",
+				"let/**/in",
+				%q[let "a" = ''a''; in],
+				%q[let "${null}" = ''a''; in],
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.let).to parse(str)
+					# Also parseable by root parser.
+					expect(parser).to parse(str + " 1")
+				end
+			end
+			[
+				"let 1 in",
+				%q[let "a" = ''a'' in],
+				%q[let ${null} = ''a'' in],
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.let).to_not parse(str)
+					# Also parseable by root parser.
+					expect(parser).to_not parse(str + " 1")
+				end
+			end
+			[
+				"let in1",
+				"let ina",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser).to_not parse(str)
+				end
+			end
+		end
+
+
 		context "operator" do
 			context "select" do
 				[
@@ -475,6 +511,16 @@ RSpec.describe NEL do
 			].each do |str|
 				it "(#{str.inspect})" do
 					expect(parser).to_not parse(str)
+				end
+			end
+		end
+
+		context "torture" do
+			[
+				%q[let"a"={a="b";};in{inherit(a)a;}],
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser).to parse(str)
 				end
 			end
 		end

@@ -138,6 +138,24 @@ class NEL < Parslet::Parser
 	}
 
 	#
+	# Let
+	#
+	rule(:let) {
+		str("let") >> space?.as(:before_) >>
+		(
+			let_pair >> space?.as(:before_) >> str(";") >> space?.as(:after_)
+		).repeat.as(:values) >>
+		space?.as(:after_) >> str("in")
+	}
+	rule(:let_attr_name) {
+		# TODO : Add antiquotation (${})
+		identifier | quoted_string
+	}
+	rule(:let_pair) {
+		let_attr_name.as(:lhs) >> space?.as(:lhs_) >> str("=") >> space?.as(:rhs_) >> value.as(:rhs)
+	}
+
+	#
 	# Identifiers
 	#
 
@@ -261,7 +279,9 @@ class NEL < Parslet::Parser
 	}
 	rule(:simple_value) { number | string | path }
 
-	rule(:expression) { operator | value }
+	rule(:expression) {
+		(let >> space).maybe >> (operator | value)
+	}
 
 
 	#
