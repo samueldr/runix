@@ -185,6 +185,42 @@ RSpec.describe NEL do
 			end
 		end
 
+		context "sets" do
+			[
+				"{}",
+				"{ }",
+				"{null=null;}",
+				"{null = null;}",
+				"{a = b;null = null;}",
+				"{ a = b ; null = null ; }",
+				"{inherit;}",
+				"{inherit pkgs;}",
+				"{inherit pkgs a b;}",
+				"{inherit pkgs; a = b;}",
+				"{inherit (self);}",
+				"{inherit (self) pkgs; a = b;}",
+				"{inherit(a)a;}",
+				"{inherit (a) a;}",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.set).to parse(str)
+				end
+			end
+			[
+				"{inherit pkgs}",
+				"{inherita}",
+				"{inherit-}",
+				"{inherit(a)(a)}",
+				"{null}",
+				"{null=null}",
+				"{null = null}",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.set).to_not parse(str)
+				end
+			end
+		end
+
 		context "operator" do
 			context "select" do
 				[
@@ -297,7 +333,7 @@ RSpec.describe NEL do
 			end
 			context "set merge" do
 				[
-					#"{}//{}", # TODO : parse sets!
+					"{}//{}",
 					"a//b",
 					"a // b",
 				].each do |str|

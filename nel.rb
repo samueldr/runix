@@ -107,6 +107,27 @@ class NEL < Parslet::Parser
 	}
 
 	#
+	# Sets
+	#
+	rule(:set) {
+		str("{") >> space? >>
+		(
+			(set_inherit | set_pair) >> space?.as(:before_) >> str(";") >> space?.as(:after_)
+		).repeat.as(:values) >>
+		str("}")
+	}
+	rule(:set_inherit) {
+		# Parenthesis makes this hard!
+		str("inherit") >>
+		(space?.as(:lhs_) >> str("(") >> identifier >> str(")") >> space?.as(:rhs?)).maybe.as(:set)>>
+		(space? >> identifier ).repeat(0).as(:attributes)
+	}
+	rule(:set_pair) {
+		# TODO : verify use of `identifier` on lhs.
+		identifier.as(:lhs) >> space?.as(:lhs_) >> str("=") >> space?.as(:rhs_) >> value.as(:rhs)
+	}
+
+	#
 	# Identifiers
 	#
 
@@ -226,7 +247,7 @@ class NEL < Parslet::Parser
 	# Compound rules
 	#
 	rule(:value) {
-		(null | boolean | list | simple_value | identifier).as(:value)
+		(null | boolean | list | set | simple_value | identifier).as(:value)
 	}
 	rule(:simple_value) { number | string | path }
 
