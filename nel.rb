@@ -33,7 +33,7 @@ class NEL < Parslet::Parser
 	# Captures a letter from a string...
 	# FIXME : find out a better way to handle this.
 	# Used until I understand how to capture groups AND handle escaping.
-	rule(:string_component) { any.as(:string_component) }
+	rule(:string_component) { antiquotation | any }
 
 	rule(:quoted_string) {
 		str('"') >> 
@@ -47,7 +47,7 @@ class NEL < Parslet::Parser
 	rule(:indented_string) {
 		str("''") >> 
 		(
-			str("'''").as(:escaped_single_quote) >> string_component |
+			(str("''") >> match["'$"]).as(:escape) |
 			str("''").absent? >> string_component
 		).repeat.as(:indented_string) >> 
 		str("''")
@@ -124,10 +124,17 @@ class NEL < Parslet::Parser
 	}
 	rule(:set_attr_name) {
 		# TODO : Add antiquotation (${})
-		identifier | quoted_string
+		identifier | quoted_string | antiquotation
 	}
 	rule(:set_pair) {
 		set_attr_name.as(:lhs) >> space?.as(:lhs_) >> str("=") >> space?.as(:rhs_) >> value.as(:rhs)
+	}
+
+	#
+	# Antiquotation
+	#
+	rule(:antiquotation) {
+		str("${") >> expression >> str("}")
 	}
 
 	#

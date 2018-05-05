@@ -51,6 +51,8 @@ RSpec.describe NEL do
 				'"a"',
 				'"ok"',
 				'"ok\""',
+				'"${a}"',
+				'"${"a"}"',
 			].each do |str|
 				it "(#{str.inspect})" do
 					expect(parser.quoted_string).to parse(str)
@@ -62,17 +64,9 @@ RSpec.describe NEL do
 			[
 				"'' ok ''",
 				"'' oki'''doo ''",
-			].each do |str|
-				it "(#{str.inspect})" do
-					expect(parser.indented_string).to parse(str)
-				end
-			end
-		end
-
-		context "indented strings" do
-			[
-				"'' ok ''",
-				"'' oki'''doo ''",
+				%q[''${"a"}''],
+				%q[''${''a''}''],
+				%q['' ''${'''a'''} ''],
 			].each do |str|
 				it "(#{str.inspect})" do
 					expect(parser.indented_string).to parse(str)
@@ -206,6 +200,7 @@ RSpec.describe NEL do
 				"{inherit (a) a;}",
 				%q[{"a" = ''a'';}],
 				%q[{"a" = null;}],
+				%q[{${null} = null;}],
 			].each do |str|
 				it "(#{str.inspect})" do
 					expect(parser.set).to parse(str)
@@ -223,6 +218,20 @@ RSpec.describe NEL do
 			].each do |str|
 				it "(#{str.inspect})" do
 					expect(parser.set).to_not parse(str)
+				end
+			end
+		end
+
+		context "antiquotation" do
+			[
+				"${1}",
+				"${identifier}",
+				'${"string"}',
+				"${null}",
+				"${1+1}",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.antiquotation).to parse(str)
 				end
 			end
 		end
