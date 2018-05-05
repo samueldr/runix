@@ -180,7 +180,6 @@ class NEL < Parslet::Parser
 		str("}")
 	}
 	rule(:function_pattern) {
-		# TODO : add arg@ @args
 		function_set_pattern_with_args.as(:set) |
 		(identifier.as(:identifier) >> (space? >> str("@")).absent?)
 	}
@@ -192,32 +191,38 @@ class NEL < Parslet::Parser
 	# Conditional
 	#
 	rule(:conditional) {
-		str("if")            >> space?.as(:_1) >>
-		expression.as(:if)   >> space?.as(:_2) >>
-		str("then")          >> space?.as(:_3) >>
-		expression.as(:then) >> space?.as(:_4) >>
-		str("else")          >> space?.as(:_5) >>
-		expression.as(:else)
+		spaced(
+			str("if"),
+			expression.as(:if),
+			str("then"),
+			expression.as(:then),
+			str("else"),
+			expression.as(:else),
+		)
 	}
 
 	#
 	# Assertions
 	#
 	rule(:assert) {
-		str("assert")             >> space?.as(:_1) >>
-		expression.as(:assertion) >> space?.as(:_2) >>
-		str(";")                  >> space?.as(:_3) >>
-		expression.as(:value);
+		spaced(
+			str("assert"),
+			expression.as(:assertion),
+			str(";"),
+			expression.as(:value),
+		)
 	}
 
 	#
 	# With expressions
 	#
 	rule(:with) {
-		str("with")         >> space?.as(:_1) >>
-		expression.as(:set) >> space?.as(:_2) >>
-		str(";")            >> space?.as(:_3) >>
-		expression.as(:expr);
+		spaced(
+			str("with"),
+			expression.as(:set),
+			str(";"),
+			expression.as(:expr),
+		)
 	}
 
 	#
@@ -393,13 +398,13 @@ class NEL < Parslet::Parser
 	rule(:simple_value) { number | string | path }
 	
 	def parenthesized(bit)
-		str("(")>> space?.as(:before_) >>
-		bit >>
-		space?.as(:after_) >> str(")")
+		spaced(str("("), bit, str(")"))
 	end
 
 	rule(:expression_fragment) {
+		(
 		(let >> space?).maybe >> (conditional | assert | with | operator | value)
+		).as(:expression_fragment)
 	}
 
 	rule(:expression) {
