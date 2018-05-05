@@ -77,11 +77,13 @@ RSpec.describe NEL do
 		context "URIs" do
 			[
 				"a:b",
+				"let:it.go",
 				"http://example.com/",
 				"http://google.com/a.b.c",
 			].each do |str|
 				it "(#{str.inspect})" do
 					expect(parser.uri).to parse(str)
+					expect(parser).to parse(str)
 				end
 			end
 		end
