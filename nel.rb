@@ -192,12 +192,22 @@ class NEL < Parslet::Parser
 	# Conditional
 	#
 	rule(:conditional) {
-		str("if")   >> space?.as(:_1) >>
-		expression  >> space?.as(:_2) >>
-		str("then") >> space?.as(:_3) >>
-		expression  >> space?.as(:_4) >>
-		str("else") >> space?.as(:_5) >>
-		expression
+		str("if")            >> space?.as(:_1) >>
+		expression.as(:if)   >> space?.as(:_2) >>
+		str("then")          >> space?.as(:_3) >>
+		expression.as(:then) >> space?.as(:_4) >>
+		str("else")          >> space?.as(:_5) >>
+		expression.as(:else)
+	}
+
+	#
+	# Assertions
+	#
+	rule(:assert) {
+		str("assert")             >> space?.as(:_1) >>
+		expression.as(:assertion) >> space?.as(:_2) >>
+		str(";")                  >> space?.as(:_3) >>
+		expression.as(:value);
 	}
 
 	#
@@ -343,7 +353,7 @@ class NEL < Parslet::Parser
 	rule(:simple_value) { number | string | path }
 
 	rule(:expression) {
-		(let >> space.maybe).maybe >> (conditional | operator | value)
+		(let >> space.maybe).maybe >> (conditional | assert | operator | value)
 	}
 
 

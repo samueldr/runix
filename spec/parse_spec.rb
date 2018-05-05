@@ -321,6 +321,18 @@ RSpec.describe NEL do
 			end
 		end
 
+		context "assert" do
+			[
+				"assert true; 1",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.assert).to parse(str)
+					# Also parseable by root parser.
+					expect(parser).to parse(str)
+				end
+			end
+		end
+
 		context "operator" do
 			context "select" do
 				[
