@@ -142,6 +142,32 @@ RSpec.describe NEL do
 			end
 		end
 
+		context "identifiers" do
+			[
+				"a",
+				"b",
+				"c-d",
+				"e_f",
+				"test",
+				"a2a",
+				"test-",
+				"test_",
+				"_test_",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.identifier).to parse(str)
+				end
+			end
+			[
+				"1",
+				"-test",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.identifier).to_not parse(str)
+				end
+			end
+		end
+
 		context "lists" do
 			[
 				"[]",

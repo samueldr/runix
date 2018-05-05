@@ -107,6 +107,15 @@ class NEL < Parslet::Parser
 	}
 
 	#
+	# Identifiers
+	#
+
+	rule(:identifier) {
+		# ID          [a-zA-Z\_][a-zA-Z0-9\_\'\-]*
+		(match['a-zA-Z_'] >> match['a-zA-Z0-9_\'-'].repeat).as(:identifier)
+	}
+
+	#
 	# Operators
 	#
 
