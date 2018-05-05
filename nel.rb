@@ -262,77 +262,107 @@ class NEL < Parslet::Parser
 	rule(:op_select) {
 		# TODO use `attr_path` as expected...
 		# TODO : test conformance with `expr_select` from nix.
-		value.as(:lhs) >> space?.as(:lhs_) >> str(".") >> space?.as(:rhs_) >> attr_path.as(:rhs)
+		spaced(
+			value.as(:lhs),
+			str("."),
+			attr_path.as(:rhs),
+		)
 	}
 
 	rule(:op_call) {
-		value.as(:lhs) >> space? >> value.as(:rhs)
+		# FIXME : expression will either need to be parenthsized OR spaced... it cannot be abcd it needs one of: (ab)cd ab(cd) ab cd
+		spaced(
+			value.as(:lhs),
+			value.as(:rhs),
+		)
 	}
 
 	rule(:op_arithmetic_negation) {
-		str("-") >> space? >> expression
+		spaced(str("-"), expression)
 	}
 	
 	rule(:op_has_attr) {
-		value.as(:lhs) >> space?.as(:lhs_) >> str("?") >> space?.as(:rhs_) >> attr_path.as(:rhs)
+		spaced(
+			value.as(:lhs),
+			str("?"),
+			attr_path.as(:rhs),
+		)
 	}
 
 	rule(:op_concat_lists) {
-		value.as(:lhs) >> space?.as(:lhs_) >> str("++") >> space?.as(:rhs_) >> value.as(:rhs)
+		spaced(
+			value.as(:lhs),
+			str("++"),
+			value.as(:rhs),
+		)
 	}
 
 	rule(:op_mul_div) {
-		value.as(:lhs) >> space?.as(:lhs_) >> match['\*/'].as(:operator) >> space?.as(:rhs_) >> value.as(:rhs)
+		spaced(
+			value.as(:lhs),
+			match['\*/'].as(:operator),
+			value.as(:rhs),
+		)
 	}
 
 	rule(:op_add_sub) {
-		value.as(:lhs) >> space?.as(:lhs_) >> match['\+-'].as(:operator) >> space?.as(:rhs_) >> value.as(:rhs)
+		spaced(
+			value.as(:lhs),
+			match['\+-'].as(:operator),
+			value.as(:rhs),
+		)
 	}
 
 	rule(:op_boolean_negation) {
-		str("!") >> space? >> expression
+		spaced(str("!"), expression)
 	}
 
 	rule(:op_set_merge) {
-		value.as(:lhs) >> space?.as(:lhs_) >> str("//") >> space?.as(:rhs_) >> value.as(:rhs)
+		spaced(
+			value.as(:lhs),
+			str("//"),
+			value.as(:rhs),
+		)
 	}
 
 	rule(:op_arithmetic_comparison) {
-		value.as(:lhs) >> space?.as(:lhs_) >>
-		(
-			str("<=") |
-			str(">=") |
-			str("<") |
-			str(">")
-		).as(:operator) >>
-		space?.as(:rhs_) >> value.as(:rhs)
+		spaced(
+			value.as(:lhs),
+			(str("<=") | str(">=") | str("<") | str(">")).as(:operator),
+			value.as(:rhs),
+		)
 	}
 
 	rule(:op_equality_inequality) {
-		value.as(:lhs) >> space?.as(:lhs_) >>
-		(
-			str("==") |
-			str("!==")
-		).as(:operator) >>
-		space?.as(:rhs_) >> value.as(:rhs)
+		spaced(
+			value.as(:lhs),
+			(str("==") | str("!==")).as(:operator),
+			value.as(:rhs),
+		)
 	}
 
 	rule(:op_logical_and) {
-		value.as(:lhs) >> space?.as(:lhs_) >>
-		str("&&") >>
-		space?.as(:rhs_) >> value.as(:rhs)
+		spaced(
+			value.as(:lhs),
+			str("&&"),
+			value.as(:rhs),
+		)
 	}
 
 	rule(:op_logical_or) {
-		value.as(:lhs) >> space?.as(:lhs_) >>
-		str("||") >>
-		space?.as(:rhs_) >> value.as(:rhs)
+		spaced(
+			value.as(:lhs),
+			str("||"),
+			value.as(:rhs),
+		)
 	}
 
 	rule(:op_logical_implication) {
-		value.as(:lhs) >> space?.as(:lhs_) >>
-		str("->") >>
-		space?.as(:rhs_) >> value.as(:rhs)
+		spaced(
+			value.as(:lhs),
+			str("->"),
+			value.as(:rhs),
+		)
 	}
 
 	rule(:operator) {
@@ -380,17 +410,30 @@ class NEL < Parslet::Parser
 	# Whitespace
 	#
 	rule(:space) {
+		# We need to keep track of vertical spaces and horizontal spaces.
+		# Comments are treated as whitespace ( 1/**/+/**/1 )
 		(
 		match['\t '].as(:horizontal_space) |
 		match['\n'].as(:vertical_space) |
 		comment
-		)
-			.repeat(1).as(:space)
+		).repeat(1).as(:space)
 	}
+	rule(:space?) { space.maybe }
 
-	rule(:space?) {
-		space.maybe
-	}
+	#
+	# Interleaves spaces in the parsing.
+	#
+	#     a+b → a_+_b
+	#
+	# Every space is identified by its position as `_i`.
+	#
+	def spaced(*bits)
+		bits.zip(
+			(bits.length).times.map {|i| space?.as("_#{i}".to_sym) }
+		)
+		.flatten()[0..-2]
+		.reduce(&:>>)
+	end
 
 	rule(:h_comment) {
 		str("#") >> (match['\n'].absent? >> any).repeat.as(:text) >> str("\n").maybe
@@ -407,7 +450,7 @@ class NEL < Parslet::Parser
 	# Allows root string to be composed of an expression surrounded with spaces.
 	# (This could be handled through stripping whitespace before parsing, but eh)
 	rule(:_root) {
-		space.repeat >> expression.maybe >> space.repeat
+		space.repeat.as(:_1) >> expression.maybe.as(:expression) >> space.repeat.as(:_2)
 	}
 	root(:_root)
 end
