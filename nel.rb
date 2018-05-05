@@ -211,6 +211,16 @@ class NEL < Parslet::Parser
 	}
 
 	#
+	# With expressions
+	#
+	rule(:with) {
+		str("with")         >> space?.as(:_1) >>
+		expression.as(:set) >> space?.as(:_2) >>
+		str(";")            >> space?.as(:_3) >>
+		expression.as(:expr);
+	}
+
+	#
 	# Identifiers
 	#
 
@@ -353,7 +363,7 @@ class NEL < Parslet::Parser
 	rule(:simple_value) { number | string | path }
 
 	rule(:expression) {
-		(let >> space.maybe).maybe >> (conditional | assert | operator | value)
+		(let >> space.maybe).maybe >> (conditional | assert | with | operator | value)
 	}
 
 

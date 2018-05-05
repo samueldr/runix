@@ -333,6 +333,18 @@ RSpec.describe NEL do
 			end
 		end
 
+		context "with" do
+			[
+				"with true; 1",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.with).to parse(str)
+					# Also parseable by root parser.
+					expect(parser).to parse(str)
+				end
+			end
+		end
+
 		context "operator" do
 			context "select" do
 				[
