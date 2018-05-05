@@ -47,6 +47,8 @@ RSpec.describe NEL do
 
 		context "quoted strings" do
 			[
+				'""',
+				'"a"',
 				'"ok"',
 				'"ok\""',
 			].each do |str|
