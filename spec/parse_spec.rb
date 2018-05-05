@@ -198,6 +198,37 @@ RSpec.describe NEL do
 				end
 			end
 		end
+
+		context "root noise" do
+			[
+			"",
+			" ",
+			"#",
+			" #",
+			" # test",
+			" # test\n # test",
+			"/**/",
+			"/*a*/",
+			"/* */",
+			"/* a */",
+			"/* /* */",
+			"/* /* /*/",
+			"/* /* /**/",
+			"/* */1/* */",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser).to parse(str)
+				end
+			end
+			[
+			"1 # test\n1 # test",
+			"/* */1/* */1",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser).to_not parse(str)
+				end
+			end
+		end
 	end
 end
 

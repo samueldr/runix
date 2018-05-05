@@ -66,20 +66,6 @@ class NEL < Parslet::Parser
 	}
 
 	#
-	# Whitespace
-	#
-	rule(:space) {
-		(
-		match['\t '].as(:horizontal_space) |
-		match['\n'].as(:vertical_space)
-		)
-			.repeat(1).as(:space)
-	}
-	rule(:space?) {
-		space.maybe
-	}
-
-	#
 	# Path
 	#
 
@@ -147,8 +133,39 @@ class NEL < Parslet::Parser
 
 	rule(:expression) { value }
 
+
+	#
+	# Whitespace
+	#
+	rule(:space) {
+		(
+		match['\t '].as(:horizontal_space) |
+		match['\n'].as(:vertical_space) |
+		comment
+		)
+			.repeat(1).as(:space)
+	}
+
+	rule(:space?) {
+		space.maybe
+	}
+
+	rule(:h_comment) {
+		str("#") >> (match['\n'].absent? >> any).repeat.as(:text) >> str("\n").maybe
+	}
+
+	rule(:c_comment) {
+		str("/*") >> (str("*/").absent? >> any).repeat.as(:text) >> str("*/").maybe
+	}
+
+	rule(:comment) {
+		h_comment.as(:h_comment) | c_comment.as(:c_comment)
+	}
+
 	# Allows root string to be composed of an expression surrounded with spaces.
 	# (This could be handled through stripping whitespace before parsing, but eh)
-	rule(:_root) { space.repeat >> expression.maybe >> space.repeat }
+	rule(:_root) {
+		space.repeat >> expression.maybe >> space.repeat
+	}
 	root(:_root)
 end
