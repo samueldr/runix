@@ -254,6 +254,33 @@ RSpec.describe NEL do
 					end
 				end
 			end
+			context "arithmetic multiplication and division" do
+				[
+					"a * b",
+					"a / b",
+					"a/* */*/* */[]",
+					"2/*/*/*/*/*/4",
+				].each do |str|
+					it "(#{str.inspect})" do
+						expect(parser.op_mul_div).to parse(str)
+						# Also parseable by root parser.
+						expect(parser).to parse(str)
+					end
+				end
+			end
+			context "arithmetic addition and subtraction" do
+				[
+					"a + b",
+					"a - b",
+					"a/* */-/* */[]",
+				].each do |str|
+					it "(#{str.inspect})" do
+						expect(parser.op_add_sub).to parse(str)
+						# Also parseable by root parser.
+						expect(parser).to parse(str)
+					end
+				end
+			end
 			# TODO : test associativity and binding.
 		end
 	end

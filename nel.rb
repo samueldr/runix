@@ -149,6 +149,14 @@ class NEL < Parslet::Parser
 		value.as(:lhs) >> space? >> str("++") >> space? >> value.as(:rhs)
 	}
 
+	rule(:op_mul_div) {
+		value.as(:lhs) >> space? >> match['\*/'].as(:operator) >> space? >> value.as(:rhs)
+	}
+
+	rule(:op_add_sub) {
+		value.as(:lhs) >> space? >> match['\+-'].as(:operator) >> space? >> value.as(:rhs)
+	}
+
 	rule(:operator) {
 		# https://nixos.org/nix/manual/#idm140737318018576
 		# TODO : binding and associativity
@@ -156,7 +164,9 @@ class NEL < Parslet::Parser
 		op_call |
 		op_arithmetic_negation |
 		op_has_attr |
-		op_concat_lists
+		op_concat_lists |
+		op_mul_div |
+		op_add_sub
 	}
 
 	#
