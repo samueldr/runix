@@ -264,110 +264,55 @@ class NEL < Parslet::Parser
 	# Operators
 	#
 
-	rule(:op_select) {
-		# TODO use `attr_path` as expected...
-		# TODO : test conformance with `expr_select` from nix.
-		spaced(
-			value.as(:lhs),
-			str("."),
-			attr_path.as(:rhs),
-		)
-	}
+	# Makes an operator.
+	# Use a symbol for the parser rule.
+	def self._op(name, operators, lhs: :value, rhs: :value, op_type: :str)
+		operators = [operators] unless operators.is_a? Array
+		rule("op_#{name}".to_sym) {
+			spaced(
+				send(lhs).as(:lhs),
+				operators.map do |operator|
+					send(op_type, operator)
+				end.reduce(&:|).as(:operator),
+				send(rhs).as(:rhs),
+			)
+		}
+	end
 
+	# Most operators are simple; expressions (or subtypes) with an operator
+	# and optional spaces around.
+
+
+	# TODO use `attr_path` as expected...
+	# TODO : test conformance with `expr_select` from nix.
+	_op(:select, ".", rhs: :attr_path)
+	_op(:has_attr, "?", rhs: :attr_path)
+
+	_op(:concat_lists, "++")
+	_op(:mul_div, '[\*/]', op_type: :match)
+	_op(:add_sub, '[\+-]', op_type: :match)
+	_op(:set_merge, "//")
+	_op(:arithmetic_comparison, ["<=", ">=", "<", ">"])
+	_op(:equality_inequality, ["==", "!=="])
+	_op(:logical_and, "&&")
+	_op(:logical_or, "||")
+	_op(:logical_implication, "->")
+
+	# The call operator is harder...
+	# It is `expression expression`, but the space *may* not be present
+	# if and only if it cannot be confused for an identifer.
+	# → x[] a{} {}x []x
 	rule(:op_call) {
 		# FIXME : expression will either need to be parenthsized OR spaced... it cannot be abcd it needs one of: (ab)cd ab(cd) ab cd
-		spaced(
-			value.as(:lhs),
-			value.as(:rhs),
-		)
+		spaced(value.as(:lhs), value.as(:rhs))
 	}
 
 	rule(:op_arithmetic_negation) {
 		spaced(str("-"), expression)
 	}
-	
-	rule(:op_has_attr) {
-		spaced(
-			value.as(:lhs),
-			str("?"),
-			attr_path.as(:rhs),
-		)
-	}
-
-	rule(:op_concat_lists) {
-		spaced(
-			value.as(:lhs),
-			str("++"),
-			value.as(:rhs),
-		)
-	}
-
-	rule(:op_mul_div) {
-		spaced(
-			value.as(:lhs),
-			match['\*/'].as(:operator),
-			value.as(:rhs),
-		)
-	}
-
-	rule(:op_add_sub) {
-		spaced(
-			value.as(:lhs),
-			match['\+-'].as(:operator),
-			value.as(:rhs),
-		)
-	}
 
 	rule(:op_boolean_negation) {
 		spaced(str("!"), expression)
-	}
-
-	rule(:op_set_merge) {
-		spaced(
-			value.as(:lhs),
-			str("//"),
-			value.as(:rhs),
-		)
-	}
-
-	rule(:op_arithmetic_comparison) {
-		spaced(
-			value.as(:lhs),
-			(str("<=") | str(">=") | str("<") | str(">")).as(:operator),
-			value.as(:rhs),
-		)
-	}
-
-	rule(:op_equality_inequality) {
-		spaced(
-			value.as(:lhs),
-			(str("==") | str("!==")).as(:operator),
-			value.as(:rhs),
-		)
-	}
-
-	rule(:op_logical_and) {
-		spaced(
-			value.as(:lhs),
-			str("&&"),
-			value.as(:rhs),
-		)
-	}
-
-	rule(:op_logical_or) {
-		spaced(
-			value.as(:lhs),
-			str("||"),
-			value.as(:rhs),
-		)
-	}
-
-	rule(:op_logical_implication) {
-		spaced(
-			value.as(:lhs),
-			str("->"),
-			value.as(:rhs),
-		)
 	}
 
 	rule(:operator) {

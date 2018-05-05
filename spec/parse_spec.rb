@@ -365,6 +365,11 @@ RSpec.describe NEL do
 					"a- b-",
 					"a # test\nb",
 					"a/* */b",
+					'a[]',
+					'a{}',
+					'{}a',
+					'[]a',
+					'[][]',
 				].each do |str|
 					it "(#{str.inspect})" do
 						expect(parser.op_call).to parse(str)
@@ -602,12 +607,13 @@ RSpec.describe NEL do
 			[
 				'let x = 1; in if ! builtins ? nixVersion then abort "test" else import ./test.nix'+"\n",
 				'! (let a = true; in a)',
-				'(x: 1) 4',
 				'(1+1)',
 				'( 1 + 1 )',
 				'( ( 1 ) + ( 1 ) )',
 				'( 1 + 1 ) > 2',
 				'1+1>2',
+				# "Weird" func calls
+				'(x: 1) 4',
 			].each do |str|
 				it "(#{str.inspect})" do
 					expect(parser).to parse(str)
