@@ -1,0 +1,203 @@
+require_relative "../nel.rb"
+
+RSpec.describe NEL do
+	let(:parser) { NEL.new }
+
+	context "rules parse" do
+
+		context "spaces" do
+			[
+				" ",
+				"  ",
+				" \n ",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.space).to parse(str)
+				end
+			end
+		end
+
+		context "integers" do
+			[
+				"0",
+				"1",
+				"9",
+				"1234",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.integer).to parse(str)
+				end
+			end
+		end
+
+		context "floating point numbers" do
+			[
+				"123.45",
+				".45",
+				".45e1",
+				"1.45e1",
+				"1.e4",
+				"1.E4",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.floating_point).to parse(str)
+				end
+			end
+		end
+
+		context "quoted strings" do
+			[
+				'"ok"',
+				'"ok\""',
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.quoted_string).to parse(str)
+				end
+			end
+		end
+
+		context "indented strings" do
+			[
+				"'' ok ''",
+				"'' oki'''doo ''",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.indented_string).to parse(str)
+				end
+			end
+		end
+
+		context "indented strings" do
+			[
+				"'' ok ''",
+				"'' oki'''doo ''",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.indented_string).to parse(str)
+				end
+			end
+		end
+
+		context "URIs" do
+			[
+				"a:b",
+				"http://example.com/",
+				"http://google.com/a.b.c",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.uri).to parse(str)
+				end
+			end
+		end
+
+		context "paths" do
+			[
+				"~/.",
+				"/.",
+				"/Users/samuel",
+				"~/a/b",
+				"~/a/b/",
+				"<nixpkgs>",
+				"<nixpkgs/a>",
+				"<nixpkgs/.>",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.path).to parse(str)
+				end
+			end
+			[
+				"1",
+				"a",
+				"./",
+				"[]",
+				"[a]",
+				"[ ]",
+				"http",
+				"http:",
+				"http://",
+				"http://a",
+				"http:a",
+				".////.",
+				".////",
+				"<nixpkgs/./>",
+				"<>",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.path).to_not parse(str)
+				end
+			end
+		end
+
+		context "some values" do
+			[
+				"true",
+				"false",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.boolean).to parse(str)
+				end
+			end
+			it "(null)" do
+				expect(parser.null).to parse("null")
+			end
+		end
+
+		context "lists" do
+			[
+				"[]",
+				"[ ]",
+				"[null]",
+				"[null null]",
+				"[ null null ]",
+				'[ "1" 2 true ]',
+				"[ [][ ]]",
+				"[[[]]]",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.list).to parse(str)
+				end
+			end
+		end
+
+#		context "operator" do
+#			context "select" do
+#				[
+#					"a.b",
+#					"a . b",
+#				].each do |str|
+#					it "(#{str.inspect})" do
+#						expect(parser.op_select).to parse(str)
+#						expect(parser).to parse(str)
+#					end
+#				end
+#			end
+#			context "call" do
+#				[
+#					"a b",
+#				].each do |str|
+#					it "(#{str.inspect})" do
+#						expect(parser).to parse(str)
+#					end
+#				end
+#			end
+#			# TODO : test associativity and binding.
+#		end
+	end
+
+	context "parser parses" do
+		context "root with spaces" do
+			[
+				" 1 ",
+				"1 ",
+				" 1",
+				"  1  ",
+				"\t\n1\n\t",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser).to parse(str)
+				end
+			end
+		end
+	end
+end
+
