@@ -273,7 +273,6 @@ RSpec.describe NEL do
 			end
 		end
 
-
 		context "let" do
 			[
 				"a: 1",
@@ -292,7 +291,7 @@ RSpec.describe NEL do
 				it "(#{str.inspect})" do
 					expect(parser.function).to parse(str)
 					# Also parseable by root parser.
-					expect(parser).to parse(str + " 1")
+					expect(parser).to parse(str)
 				end
 			end
 
@@ -310,6 +309,17 @@ RSpec.describe NEL do
 			end
 		end
 
+		context "if" do
+			[
+				"if true then 1 else 1",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.conditional).to parse(str)
+					# Also parseable by root parser.
+					expect(parser).to parse(str)
+				end
+			end
+		end
 
 		context "operator" do
 			context "select" do
