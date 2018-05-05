@@ -157,6 +157,34 @@ class NEL < Parslet::Parser
 	}
 
 	#
+	# Function
+	#
+	rule(:function_set_pattern_identifier) {
+		space?.as(:before_) >>
+		(identifier.as(:identifier)) >>
+		space?.as(:middle_) >>
+		(str("?") >> space? >> expression).maybe >>
+		space?.as(:after_)
+	}
+	rule(:function_set_pattern) {
+		str("{") >> space? >>
+		(
+			function_set_pattern_identifier >>
+			(str(",") >> function_set_pattern_identifier).repeat
+		).repeat.as(:values) >>
+		(str(",") >> space?.as(:before_) >> str("...").as(:additional) >> space?.as(:after_)).maybe >>
+		str("}")
+	}
+	rule(:function_pattern) {
+		# TODO : add arg@ @args
+		identifier.as(:identifier) |
+		function_set_pattern.as(:set)
+	}
+	rule(:function) {
+		function_pattern.as(:pattern) >> str(":") >> space >> expression.as(:body)
+	}
+
+	#
 	# Identifiers
 	#
 
@@ -294,7 +322,7 @@ class NEL < Parslet::Parser
 	# Compound rules
 	#
 	rule(:value) {
-		(null | boolean | list | set | simple_value | identifier).as(:value)
+		(null | boolean | function | list | set | simple_value | identifier).as(:value)
 	}
 	rule(:simple_value) { number | string | path }
 

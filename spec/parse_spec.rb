@@ -274,6 +274,35 @@ RSpec.describe NEL do
 		end
 
 
+		context "let" do
+			[
+				"a: 1",
+				"{a}: 1",
+				"{a, b}: 1",
+				"{ a , b }: 1",
+				"{ a , b, ... }: 1",
+				"{a,b,...}: 1",
+				'{ a , b ? "ok" }: 1',
+				'{ a , b ? 1+1 }: 1',
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.function).to parse(str)
+					# Also parseable by root parser.
+					expect(parser).to parse(str + " 1")
+				end
+			end
+
+			[
+				"a:b", # URI
+				"{ a , b, ..., c }: 1",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser.function).to_not parse(str)
+				end
+			end
+		end
+
+
 		context "operator" do
 			context "select" do
 				[
