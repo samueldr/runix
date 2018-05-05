@@ -370,6 +370,9 @@ RSpec.describe NEL do
 					'{}a',
 					'[]a',
 					'[][]',
+					'(x)1',
+					'x(1)',
+					'(x)(1)',
 				].each do |str|
 					it "(#{str.inspect})" do
 						expect(parser.op_call).to parse(str)
