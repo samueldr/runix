@@ -146,7 +146,7 @@ class NEL < Parslet::Parser
 		(
 			let_pair >> space?.as(:before_) >> str(";") >> space?.as(:after_)
 		).repeat.as(:values) >>
-		space?.as(:after_) >> str("in")
+		space?.as(:after_) >> str("in") >> (identifier_match | number).absent?
 	}
 	rule(:let_attr_name) {
 		# TODO : Add antiquotation (${})
@@ -161,7 +161,7 @@ class NEL < Parslet::Parser
 	#
 
 	# Marks a word as forbidden for identifiers.
-	def identifier_keyword(string)
+	def not_keyword(string)
 		(str(string) >> identifier_match.absent?).absent?
 	end
 
@@ -170,16 +170,16 @@ class NEL < Parslet::Parser
 	}
 	rule(:identifier) {
 		# ID          [a-zA-Z\_][a-zA-Z0-9\_\'\-]*
-		identifier_keyword("if") >>
-		identifier_keyword("then") >>
-		identifier_keyword("else") >>
-		identifier_keyword("assert") >>
-		identifier_keyword("with") >>
-		identifier_keyword("let") >>
-		identifier_keyword("in") >>
-		identifier_keyword("rec") >>
-		identifier_keyword("inherit") >>
-		identifier_keyword("or") >>
+		not_keyword("if") >>
+		not_keyword("then") >>
+		not_keyword("else") >>
+		not_keyword("assert") >>
+		not_keyword("with") >>
+		not_keyword("let") >>
+		not_keyword("in") >>
+		not_keyword("rec") >>
+		not_keyword("inherit") >>
+		not_keyword("or") >>
 		(identifier_match).as(:identifier)
 	}
 
@@ -299,7 +299,7 @@ class NEL < Parslet::Parser
 	rule(:simple_value) { number | string | path }
 
 	rule(:expression) {
-		(let >> space).maybe >> (operator | value)
+		(let >> space.maybe).maybe >> (operator | value)
 	}
 
 
