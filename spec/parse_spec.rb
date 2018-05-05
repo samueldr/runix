@@ -183,6 +183,8 @@ RSpec.describe NEL do
 
 		context "sets" do
 			[
+				"rec{}",
+				"rec {}",
 				"{}",
 				"{ }",
 				"{null=null;}",

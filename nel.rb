@@ -110,7 +110,7 @@ class NEL < Parslet::Parser
 	# Sets
 	#
 	rule(:set) {
-		str("{") >> space? >>
+		(str("rec") >> space?).maybe.as(:rec) >> str("{") >> space? >>
 		(
 			(set_inherit | set_pair) >> space?.as(:before_) >> str(";") >> space?.as(:after_)
 		).repeat.as(:values) >>
