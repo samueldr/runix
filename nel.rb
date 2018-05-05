@@ -120,11 +120,11 @@ class NEL < Parslet::Parser
 	#
 
 	rule(:op_select) {
-		value >> space? >> str(".") >> space? >> value
+		value.as(:lhs) >> space?.as(:lhs_) >> str(".") >> space?.as(:rhs_) >> value.as(:rhs)
 	}
 
 	rule(:op_call) {
-		value >> space? >> value
+		value.as(:lhs) >> space? >> value.as(:rhs)
 	}
 
 	rule(:operator) {
@@ -136,11 +136,11 @@ class NEL < Parslet::Parser
 	# Compound rules
 	#
 	rule(:value) {
-		list | simple_value
+		null | boolean | list | simple_value | identifier
 	}
-	rule(:simple_value) { null | boolean | number | string | path }
+	rule(:simple_value) { number | string | path }
 
-	rule(:expression) { value }
+	rule(:expression) { operator | value }
 
 
 	#

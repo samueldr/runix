@@ -185,29 +185,36 @@ RSpec.describe NEL do
 			end
 		end
 
-#		context "operator" do
-#			context "select" do
-#				[
-#					"a.b",
-#					"a . b",
-#				].each do |str|
-#					it "(#{str.inspect})" do
-#						expect(parser.op_select).to parse(str)
-#						expect(parser).to parse(str)
-#					end
-#				end
-#			end
-#			context "call" do
-#				[
-#					"a b",
-#				].each do |str|
-#					it "(#{str.inspect})" do
-#						expect(parser).to parse(str)
-#					end
-#				end
-#			end
-#			# TODO : test associativity and binding.
-#		end
+		context "operator" do
+			context "select" do
+				[
+					"a.b",
+					"a . b",
+					"a/**/.a",
+				].each do |str|
+					it "(#{str.inspect})" do
+						expect(parser.op_select).to parse(str)
+						# Also parseable by root parser.
+						expect(parser).to parse(str)
+					end
+				end
+			end
+			context "call" do
+				[
+					"a b",
+					"a- b-",
+					"a # test\nb",
+					"a/* */b",
+				].each do |str|
+					it "(#{str.inspect})" do
+						expect(parser.op_call).to parse(str)
+						# Also parseable by root parser.
+						expect(parser).to parse(str)
+					end
+				end
+			end
+			# TODO : test associativity and binding.
+		end
 	end
 
 	context "parser parses" do
@@ -227,28 +234,29 @@ RSpec.describe NEL do
 
 		context "root noise" do
 			[
-			"",
-			" ",
-			"#",
-			" #",
-			" # test",
-			" # test\n # test",
-			"/**/",
-			"/*a*/",
-			"/* */",
-			"/* a */",
-			"/* /* */",
-			"/* /* /*/",
-			"/* /* /**/",
-			"/* */1/* */",
+				"",
+				" ",
+				"#",
+				" #",
+				" # test",
+				" # test\n # test",
+				"/**/",
+				"/*a*/",
+				"/* */",
+				"/* a */",
+				"/* /* */",
+				"/* /* /*/",
+				"/* /* /**/",
+				"/* */1/* */",
 			].each do |str|
 				it "(#{str.inspect})" do
 					expect(parser).to parse(str)
 				end
 			end
 			[
-			"1 # test\n1 # test",
-			"/* */1/* */1",
+				# Actually valid! (call operator)
+				#"1 # test\n1 # test",
+				#"/* */1/* */1",
 			].each do |str|
 				it "(#{str.inspect})" do
 					expect(parser).to_not parse(str)
