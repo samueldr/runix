@@ -308,6 +308,35 @@ RSpec.describe NEL do
 					end
 				end
 			end
+			context "arithmetic comparison" do
+				[
+					"a>b",
+					"a > b",
+					"a < b",
+					"a>=b",
+					"a >= b",
+					"a <= b",
+				].each do |str|
+					it "(#{str.inspect})" do
+						expect(parser.op_arithmetic_comparison).to parse(str)
+						# Also parseable by root parser.
+						expect(parser).to parse(str)
+					end
+				end
+			end
+			context "equality and inequality" do
+				[
+					"a==b",
+					"a !== b",
+					"a == b",
+				].each do |str|
+					it "(#{str.inspect})" do
+						expect(parser.op_equality_inequality).to parse(str)
+						# Also parseable by root parser.
+						expect(parser).to parse(str)
+					end
+				end
+			end
 			# TODO : test associativity and binding.
 		end
 	end

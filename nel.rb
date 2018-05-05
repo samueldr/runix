@@ -142,19 +142,19 @@ class NEL < Parslet::Parser
 	}
 	
 	rule(:op_has_attr) {
-		value.as(:lhs) >> space? >> str("?") >> space? >> attr_path.as(:rhs)
+		value.as(:lhs) >> space?.as(:lhs_) >> str("?") >> space?.as(:rhs_) >> attr_path.as(:rhs)
 	}
 
 	rule(:op_concat_lists) {
-		value.as(:lhs) >> space? >> str("++") >> space? >> value.as(:rhs)
+		value.as(:lhs) >> space?.as(:lhs_) >> str("++") >> space?.as(:rhs_) >> value.as(:rhs)
 	}
 
 	rule(:op_mul_div) {
-		value.as(:lhs) >> space? >> match['\*/'].as(:operator) >> space? >> value.as(:rhs)
+		value.as(:lhs) >> space?.as(:lhs_) >> match['\*/'].as(:operator) >> space?.as(:rhs_) >> value.as(:rhs)
 	}
 
 	rule(:op_add_sub) {
-		value.as(:lhs) >> space? >> match['\+-'].as(:operator) >> space? >> value.as(:rhs)
+		value.as(:lhs) >> space?.as(:lhs_) >> match['\+-'].as(:operator) >> space?.as(:rhs_) >> value.as(:rhs)
 	}
 
 	rule(:op_boolean_negation) {
@@ -162,7 +162,27 @@ class NEL < Parslet::Parser
 	}
 
 	rule(:op_set_merge) {
-		value.as(:lhs) >> space? >> str("//") >> space? >> value.as(:rhs)
+		value.as(:lhs) >> space?.as(:lhs_) >> str("//") >> space?.as(:rhs_) >> value.as(:rhs)
+	}
+
+	rule(:op_arithmetic_comparison) {
+		value.as(:lhs) >> space?.as(:lhs_) >>
+		(
+			str("<=") |
+			str(">=") |
+			str("<") |
+			str(">")
+		).as(:operator) >>
+		space?.as(:rhs_) >> value.as(:rhs)
+	}
+
+	rule(:op_equality_inequality) {
+		value.as(:lhs) >> space?.as(:lhs_) >>
+		(
+			str("==") |
+			str("!==")
+		).as(:operator) >>
+		space?.as(:rhs_) >> value.as(:rhs)
 	}
 
 	rule(:operator) {
@@ -176,7 +196,9 @@ class NEL < Parslet::Parser
 		op_mul_div |
 		op_add_sub |
 		op_boolean_negation |
-		op_set_merge
+		op_set_merge |
+		op_arithmetic_comparison |
+		op_equality_inequality
 	}
 
 	#
