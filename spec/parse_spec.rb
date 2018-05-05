@@ -281,6 +281,20 @@ RSpec.describe NEL do
 					end
 				end
 			end
+			context "boolean negation" do
+				[
+					"!1",
+					"!b",
+					"!# test\nc",
+					"!/* */3",
+				].each do |str|
+					it "(#{str.inspect})" do
+						expect(parser.op_boolean_negation).to parse(str)
+						# Also parseable by root parser.
+						expect(parser).to parse(str)
+					end
+				end
+			end
 			# TODO : test associativity and binding.
 		end
 	end
