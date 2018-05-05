@@ -266,7 +266,7 @@ class NEL < Parslet::Parser
 
 	# Makes an operator.
 	# Use a symbol for the parser rule.
-	def self._op(name, operators, lhs: :value, rhs: :value, op_type: :str)
+	def self._op(name, operators, lhs: :value, rhs: :expression, op_type: :str)
 		operators = [operators] unless operators.is_a? Array
 		rule("op_#{name}".to_sym) {
 			spaced(
@@ -304,7 +304,7 @@ class NEL < Parslet::Parser
 	# → x[] a{} {}x []x
 	rule(:op_call) {
 		# FIXME : expression will either need to be parenthsized OR spaced... it cannot be abcd it needs one of: (ab)cd ab(cd) ab cd
-		spaced(value.as(:lhs), value.as(:rhs))
+		spaced(value.as(:lhs), expression.as(:rhs))
 	}
 
 	rule(:op_arithmetic_negation) {
