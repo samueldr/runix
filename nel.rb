@@ -127,16 +127,21 @@ class NEL < Parslet::Parser
 		value.as(:lhs) >> space? >> value.as(:rhs)
 	}
 
+	rule(:op_arithmetic_negation) {
+		str("-") >> space? >> value
+	}
+
 	rule(:operator) {
+		# https://nixos.org/nix/manual/#idm140737318018576
 		# TODO : binding and associativity
-		op_select | op_call
+		op_select | op_call | op_arithmetic_negation
 	}
 
 	#
 	# Compound rules
 	#
 	rule(:value) {
-		null | boolean | list | simple_value | identifier
+		(null | boolean | list | simple_value | identifier).as(:value)
 	}
 	rule(:simple_value) { number | string | path }
 
