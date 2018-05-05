@@ -227,7 +227,7 @@ RSpec.describe NEL do
 					end
 				end
 			end
-			context "contains attrpath" do
+			context "has attr" do
 				[
 					"a?b",
 					"a ? b",
@@ -235,6 +235,20 @@ RSpec.describe NEL do
 				].each do |str|
 					it "(#{str.inspect})" do
 						expect(parser.op_has_attr).to parse(str)
+						# Also parseable by root parser.
+						expect(parser).to parse(str)
+					end
+				end
+			end
+			context "concat lists" do
+				[
+					"[]++[]",
+					"a++b",
+					"a ++ b",
+					"a/* */++/* */[]",
+				].each do |str|
+					it "(#{str.inspect})" do
+						expect(parser.op_concat_lists).to parse(str)
 						# Also parseable by root parser.
 						expect(parser).to parse(str)
 					end

@@ -145,13 +145,18 @@ class NEL < Parslet::Parser
 		value.as(:lhs) >> space? >> str("?") >> space? >> attr_path.as(:rhs)
 	}
 
+	rule(:op_concat_lists) {
+		value.as(:lhs) >> space? >> str("++") >> space? >> value.as(:rhs)
+	}
+
 	rule(:operator) {
 		# https://nixos.org/nix/manual/#idm140737318018576
 		# TODO : binding and associativity
 		op_select |
 		op_call |
 		op_arithmetic_negation |
-		op_has_attr
+		op_has_attr |
+		op_concat_lists
 	}
 
 	#
