@@ -392,6 +392,7 @@ RSpec.describe NEL do
 					"a?b",
 					"a ? b",
 					"a/* */?/* */b",
+					"{a = 1;} ? a",
 				].each do |str|
 					it "(#{str.inspect})" do
 						expect(parser.op_has_attr).to parse(str)
@@ -536,6 +537,17 @@ RSpec.describe NEL do
 				end
 			end
 			# TODO : test associativity and binding.
+			context "with associativity and binding" do
+				[
+					'! {a = 1;} ? a',
+				].each do |str|
+					it "(#{str.inspect})" do
+						expect(parser.expression).to parse(str)
+						# Also parseable by root parser.
+						expect(parser).to parse(str)
+					end
+				end
+			end
 		end
 	end
 
@@ -579,6 +591,30 @@ RSpec.describe NEL do
 				# Actually valid! (call operator)
 				#"1 # test\n1 # test",
 				#"/* */1/* */1",
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser).to_not parse(str)
+				end
+			end
+		end
+
+		context "integration" do
+			[
+				'let x = 1; in if ! builtins ? nixVersion then abort "test" else import ./test.nix'+"\n",
+				'! (let a = true; in a)',
+				'(x: 1) 4',
+				'(1+1)',
+				'( 1 + 1 )',
+				'( ( 1 ) + ( 1 ) )',
+				'( 1 + 1 ) > 2',
+				'1+1>2',
+			].each do |str|
+				it "(#{str.inspect})" do
+					expect(parser).to parse(str)
+				end
+			end
+			[
+				'! let a = true; in a',
 			].each do |str|
 				it "(#{str.inspect})" do
 					expect(parser).to_not parse(str)

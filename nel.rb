@@ -262,7 +262,7 @@ class NEL < Parslet::Parser
 	rule(:op_select) {
 		# TODO use `attr_path` as expected...
 		# TODO : test conformance with `expr_select` from nix.
-		value.as(:lhs) >> space?.as(:lhs_) >> str(".") >> space?.as(:rhs_) >> value.as(:rhs)
+		value.as(:lhs) >> space?.as(:lhs_) >> str(".") >> space?.as(:rhs_) >> attr_path.as(:rhs)
 	}
 
 	rule(:op_call) {
@@ -270,7 +270,7 @@ class NEL < Parslet::Parser
 	}
 
 	rule(:op_arithmetic_negation) {
-		str("-") >> space? >> value
+		str("-") >> space? >> expression
 	}
 	
 	rule(:op_has_attr) {
@@ -290,7 +290,7 @@ class NEL < Parslet::Parser
 	}
 
 	rule(:op_boolean_negation) {
-		str("!") >> space? >> value
+		str("!") >> space? >> expression
 	}
 
 	rule(:op_set_merge) {
@@ -361,11 +361,20 @@ class NEL < Parslet::Parser
 		(null | boolean | function | list | set | simple_value | identifier).as(:value)
 	}
 	rule(:simple_value) { number | string | path }
+	
+	def parenthesized(bit)
+		str("(")>> space?.as(:before_) >>
+		bit >>
+		space?.as(:after_) >> str(")")
+	end
 
-	rule(:expression) {
-		(let >> space.maybe).maybe >> (conditional | assert | with | operator | value)
+	rule(:expression_fragment) {
+		(let >> space?).maybe >> (conditional | assert | with | operator | value)
 	}
 
+	rule(:expression) {
+		parenthesized(expression_fragment) | expression_fragment
+	}
 
 	#
 	# Whitespace
