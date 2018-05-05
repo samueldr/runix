@@ -295,6 +295,19 @@ RSpec.describe NEL do
 					end
 				end
 			end
+			context "set merge" do
+				[
+					#"{}//{}", # TODO : parse sets!
+					"a//b",
+					"a // b",
+				].each do |str|
+					it "(#{str.inspect})" do
+						expect(parser.op_set_merge).to parse(str)
+						# Also parseable by root parser.
+						expect(parser).to parse(str)
+					end
+				end
+			end
 			# TODO : test associativity and binding.
 		end
 	end

@@ -161,6 +161,10 @@ class NEL < Parslet::Parser
 		str("!") >> space? >> value
 	}
 
+	rule(:op_set_merge) {
+		value.as(:lhs) >> space? >> str("//") >> space? >> value.as(:rhs)
+	}
+
 	rule(:operator) {
 		# https://nixos.org/nix/manual/#idm140737318018576
 		# TODO : binding and associativity
@@ -171,7 +175,8 @@ class NEL < Parslet::Parser
 		op_concat_lists |
 		op_mul_div |
 		op_add_sub |
-		op_boolean_negation
+		op_boolean_negation |
+		op_set_merge
 	}
 
 	#
