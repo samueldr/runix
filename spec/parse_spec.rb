@@ -614,6 +614,11 @@ RSpec.describe NEL do
 				'! (let a = true; in a)',
 				'(1+1)',
 				'( 1 + 1 )',
+				'1',
+				'(1)',
+				'((1))',
+				'(((1)))',
+				'( ( 1 ) )',
 				'( ( 1 ) + ( 1 ) )',
 				'( 1 + 1 ) > 2',
 				'1+1>2',
@@ -626,6 +631,8 @@ RSpec.describe NEL do
 			end
 			[
 				'! let a = true; in a',
+				'(((1))',
+				'((1)))',
 			].each do |str|
 				it "(#{str.inspect})" do
 					expect(parser).to_not parse(str)

@@ -364,19 +364,24 @@ class NEL < Parslet::Parser
 	}
 	rule(:simple_value) { number | string | path }
 	
-	def parenthesized(bit)
-		spaced(str("("), bit, str(")"))
+	# Given a name and an inner rule, creates a rule named `name`
+	# which will recursively try to enter with parens or call rule `inner`.
+	def self.parenthesized(name, inner)
+		rule(name) {
+			(
+				# No other parens? Finally something to work with!
+				str("(").absent? >> send(inner) |
+				# Matches (balanced) parens and re-enters.
+				spaced(str("("), send(name), str(")")).as(:parenthesized)
+			).as(name)
+		}
 	end
 
-	rule(:expression_fragment) {
-		(
+	rule(:expression_inner) {
 		(let >> space?).maybe >> (conditional | assert | with | operator | value)
-		).as(:expression_fragment)
 	}
 
-	rule(:expression) {
-		parenthesized(expression_fragment) | expression_fragment
-	}
+	parenthesized(:expression, :expression_inner)
 
 	#
 	# Whitespace
