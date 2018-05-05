@@ -115,11 +115,21 @@ class NEL < Parslet::Parser
 		(match['a-zA-Z_'] >> match['a-zA-Z0-9_\'-'].repeat).as(:identifier)
 	}
 
+	rule(:attr_path) {
+		# 337   | expr_op '?' attrpath { $$ = new ExprOpHasAttr($1, *$3); }
+		#                     ^^^^^^^^
+		# TODO: rhs: expecting ID or OR_KW or DOLLAR_CURLY or '"', at (string):1:5
+		#       this is attrpath in the source... see also where-else it's used and I should use it.
+		identifier
+	}
+
 	#
 	# Operators
 	#
 
 	rule(:op_select) {
+		# TODO use `attr_path` as expected...
+		# TODO : test conformance with `expr_select` from nix.
 		value.as(:lhs) >> space?.as(:lhs_) >> str(".") >> space?.as(:rhs_) >> value.as(:rhs)
 	}
 
@@ -130,11 +140,18 @@ class NEL < Parslet::Parser
 	rule(:op_arithmetic_negation) {
 		str("-") >> space? >> value
 	}
+	
+	rule(:op_has_attr) {
+		value.as(:lhs) >> space? >> str("?") >> space? >> attr_path.as(:rhs)
+	}
 
 	rule(:operator) {
 		# https://nixos.org/nix/manual/#idm140737318018576
 		# TODO : binding and associativity
-		op_select | op_call | op_arithmetic_negation
+		op_select |
+		op_call |
+		op_arithmetic_negation |
+		op_has_attr
 	}
 
 	#
