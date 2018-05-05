@@ -159,9 +159,27 @@ class NEL < Parslet::Parser
 	# Identifiers
 	#
 
+	# Marks a word as forbidden for identifiers.
+	def identifier_keyword(string)
+		(str(string) >> identifier_match.absent?).absent?
+	end
+
+	rule(:identifier_match) {
+		match['a-zA-Z_'] >> match['a-zA-Z0-9_\'-'].repeat
+	}
 	rule(:identifier) {
 		# ID          [a-zA-Z\_][a-zA-Z0-9\_\'\-]*
-		(match['a-zA-Z_'] >> match['a-zA-Z0-9_\'-'].repeat).as(:identifier)
+		identifier_keyword("if") >>
+		identifier_keyword("then") >>
+		identifier_keyword("else") >>
+		identifier_keyword("assert") >>
+		identifier_keyword("with") >>
+		identifier_keyword("let") >>
+		identifier_keyword("in") >>
+		identifier_keyword("rec") >>
+		identifier_keyword("inherit") >>
+		identifier_keyword("or") >>
+		(identifier_match).as(:identifier)
 	}
 
 	rule(:attr_path) {
