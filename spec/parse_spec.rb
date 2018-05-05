@@ -337,6 +337,44 @@ RSpec.describe NEL do
 					end
 				end
 			end
+			context "logical and" do
+				[
+					"a&&b",
+					"a && b",
+				].each do |str|
+					it "(#{str.inspect})" do
+						expect(parser.op_logical_and).to parse(str)
+						# Also parseable by root parser.
+						expect(parser).to parse(str)
+					end
+				end
+			end
+			context "logical or" do
+				[
+					"a||b",
+					"a || b",
+				].each do |str|
+					it "(#{str.inspect})" do
+						expect(parser.op_logical_or).to parse(str)
+						# Also parseable by root parser.
+						expect(parser).to parse(str)
+					end
+				end
+			end
+			context "logical implication" do
+				[
+					#"a->b", NOPE!: [a-, >, b]
+					"a -> b",
+					"a ->b",
+					#"(a)->b", # TODO parens
+				].each do |str|
+					it "(#{str.inspect})" do
+						expect(parser.op_logical_implication).to parse(str)
+						# Also parseable by root parser.
+						expect(parser).to parse(str)
+					end
+				end
+			end
 			# TODO : test associativity and binding.
 		end
 	end

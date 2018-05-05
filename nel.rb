@@ -185,6 +185,24 @@ class NEL < Parslet::Parser
 		space?.as(:rhs_) >> value.as(:rhs)
 	}
 
+	rule(:op_logical_and) {
+		value.as(:lhs) >> space?.as(:lhs_) >>
+		str("&&") >>
+		space?.as(:rhs_) >> value.as(:rhs)
+	}
+
+	rule(:op_logical_or) {
+		value.as(:lhs) >> space?.as(:lhs_) >>
+		str("||") >>
+		space?.as(:rhs_) >> value.as(:rhs)
+	}
+
+	rule(:op_logical_implication) {
+		value.as(:lhs) >> space?.as(:lhs_) >>
+		str("->") >>
+		space?.as(:rhs_) >> value.as(:rhs)
+	}
+
 	rule(:operator) {
 		# https://nixos.org/nix/manual/#idm140737318018576
 		# TODO : binding and associativity
@@ -198,7 +216,10 @@ class NEL < Parslet::Parser
 		op_boolean_negation |
 		op_set_merge |
 		op_arithmetic_comparison |
-		op_equality_inequality
+		op_equality_inequality |
+		op_logical_and |
+		op_logical_or |
+		op_logical_implication
 	}
 
 	#
