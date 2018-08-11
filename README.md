@@ -1,3 +1,6 @@
+> **Status:** the current implementation is abandoned. Not sure if *this
+> implementation* will be revived.
+
 runix
 =====
 
@@ -14,7 +17,7 @@ It though, won't run nix code 🐱
 
 ## What can it do?
 
-Not much for now! It parses probably valid nix, and may parse most nix code.
+Not much for now! It parses probably valid nix, and probably doesn't parse most nix code.
 
 ## Goals
 
