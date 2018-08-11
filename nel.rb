@@ -340,20 +340,39 @@ class NEL < Parslet::Parser
 	rule(:operator) {
 		# https://nixos.org/nix/manual/#idm140737318018576
 		# TODO : binding and associativity
-		op_select |
-		op_call |
-		op_arithmetic_negation |
-		op_has_attr |
-		op_concat_lists |
-		op_mul_div |
-		op_add_sub |
-		op_boolean_negation |
-		op_set_merge |
-		op_arithmetic_comparison |
-		op_equality_inequality |
-		op_logical_and |
-		op_logical_or |
-		op_logical_implication
+		#op_select |
+		#op_call |
+		#op_arithmetic_negation |
+		#op_has_attr |
+		#op_concat_lists |
+		#op_mul_div |
+		#op_add_sub |
+		#op_boolean_negation |
+		#op_set_merge |
+		#op_arithmetic_comparison |
+		#op_equality_inequality |
+		#op_logical_and |
+		#op_logical_or |
+		#op_logical_implication
+
+		none = :left # hack
+		infix_expression(
+			value,
+			[op_select, 15, none],
+			[op_call, 14, :left],
+			[op_arithmetic_negation, 13, none],
+			[op_has_attr, 12, none],
+			[op_concat_lists, 11, :right],
+			[op_mul_div, 10, :left],
+			[op_add_sub, 9, :left],
+			[op_boolean_negation, 8, none],
+			[op_set_merge, 7, :right],
+			[op_arithmetic_comparison, 6, none],
+			[op_equality_inequality, 5, none],
+			[op_logical_and, 4, :left],
+			[op_logical_or, 3, :left],
+			[op_logical_implication, 2, none],
+		)
 	}
 
 	#
